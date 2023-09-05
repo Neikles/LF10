@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=3.71.0"
+      version = "=2.91.0"
     }
   }
 }
@@ -83,4 +83,67 @@ resource "azurerm_subnet" "internal-sv" {
   resource_group_name  = azurerm_resource_group.echt.name
   virtual_network_name = azurerm_virtual_network.echt.name
   address_prefixes     = ["10.0.100.0/24"]
+}
+
+
+# Create Security-Group
+resource "azurerm_network_security_group" "echt-sg" {
+  name                = "echt-securitygroup"
+  location            = azurerm_resource_group.echt.location
+  resource_group_name = azurerm_resource_group.echt.name
+
+  tags = {
+    enviroment = "dev"
+  }
+}
+
+# Inbound ruleset
+resource "azurerm_network_security_rule" "echt-dev-rule" {
+  name                        = "echt-dev-rule"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.echt.name
+  network_security_group_name = azurerm_network_security_group.echt-sg.name
+}
+
+# Rule assigment to subnet
+resource "azurerm_subnet_network_security_group_association" "echt-sga" {
+  subnet_id                 = azurerm_subnet.internal-sv.id
+  network_security_group_id = azurerm_network_security_group.echt-sg.id
+}
+
+# Create public IP
+resource "azurerm_public_ip" "echt-ip" {
+  name                = "echt-ip-1"
+  resource_group_name = azurerm_resource_group.echt.name
+  location            = azurerm_resource_group.echt.location
+  allocation_method   = "Static"
+
+  tags = {
+    enviroment = "dev"
+  }
+}
+
+# Create Interface on Subnet with public IP 
+resource "azurerm_network_interface" "echt-nic" {
+  name                = "echt-nic"
+  location            = azurerm_resource_group.echt.location
+  resource_group_name = azurerm_resource_group.echt.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.internal-sv.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.echt-ip.id
+  }
+
+  tags = {
+    enviroment = "dev"
+  }
 }
