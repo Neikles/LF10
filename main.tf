@@ -14,7 +14,7 @@ provider "azurerm" {
 }
 
 # Create a resource group
-resource "azurerm_resource_group" "echt" {
+resource "azurerm_resource_group" "eHH" {
   name     = "${var.prefix}-rg"
   location = var.location
 
@@ -24,10 +24,10 @@ resource "azurerm_resource_group" "echt" {
 }
 
 # Create a virtuell network
-resource "azurerm_virtual_network" "echt" {
+resource "azurerm_virtual_network" "eHH" {
   name                = "${var.prefix}-vn"
-  resource_group_name = azurerm_resource_group.echt.name
-  location            = azurerm_resource_group.echt.location
+  resource_group_name = azurerm_resource_group.eHH.name
+  location            = azurerm_resource_group.eHH.location
   address_space       = ["10.0.0.0/16"]
 
   tags = {
@@ -40,57 +40,57 @@ resource "azurerm_virtual_network" "echt" {
 #Bar 10
 resource "azurerm_subnet" "internal-bar" {
   name                 = "internal-bar"
-  resource_group_name  = azurerm_resource_group.echt.name
-  virtual_network_name = azurerm_virtual_network.echt.name
+  resource_group_name  = azurerm_resource_group.eHH.name
+  virtual_network_name = azurerm_virtual_network.eHH.name
   address_prefixes     = ["10.0.10.0/24"]
 }
 
 #Shop 20
 resource "azurerm_subnet" "internal-shop" {
   name                 = "internal-shop"
-  resource_group_name  = azurerm_resource_group.echt.name
-  virtual_network_name = azurerm_virtual_network.echt.name
+  resource_group_name  = azurerm_resource_group.eHH.name
+  virtual_network_name = azurerm_virtual_network.eHH.name
   address_prefixes     = ["10.0.20.0/24"]
 }
 
 #EDV 30
 resource "azurerm_subnet" "internal-edv" {
   name                 = "internal-edv"
-  resource_group_name  = azurerm_resource_group.echt.name
-  virtual_network_name = azurerm_virtual_network.echt.name
+  resource_group_name  = azurerm_resource_group.eHH.name
+  virtual_network_name = azurerm_virtual_network.eHH.name
   address_prefixes     = ["10.0.30.0/24"]
 }
 
 #Event 40
 resource "azurerm_subnet" "internal-event" {
   name                 = "internal-events"
-  resource_group_name  = azurerm_resource_group.echt.name
-  virtual_network_name = azurerm_virtual_network.echt.name
+  resource_group_name  = azurerm_resource_group.eHH.name
+  virtual_network_name = azurerm_virtual_network.eHH.name
   address_prefixes     = ["10.0.40.0/24"]
 }
 
 #Management 99
 resource "azurerm_subnet" "internal-mgmt" {
   name                 = "internal-management"
-  resource_group_name  = azurerm_resource_group.echt.name
-  virtual_network_name = azurerm_virtual_network.echt.name
+  resource_group_name  = azurerm_resource_group.eHH.name
+  virtual_network_name = azurerm_virtual_network.eHH.name
   address_prefixes     = ["10.0.99.0/24"]
 }
 
 #Sever 100
 resource "azurerm_subnet" "internal-sv" {
   name                 = "internal-server"
-  resource_group_name  = azurerm_resource_group.echt.name
-  virtual_network_name = azurerm_virtual_network.echt.name
+  resource_group_name  = azurerm_resource_group.eHH.name
+  virtual_network_name = azurerm_virtual_network.eHH.name
   address_prefixes     = ["10.0.100.0/24"]
 }
 
 
 # Create Security-Group
-resource "azurerm_network_security_group" "echt-sg" {
-  name                = "echt-securitygroup"
-  location            = azurerm_resource_group.echt.location
-  resource_group_name = azurerm_resource_group.echt.name
+resource "azurerm_network_security_group" "eHH-sg" {
+  name                = "eHH-securitygroup"
+  location            = azurerm_resource_group.eHH.location
+  resource_group_name = azurerm_resource_group.eHH.name
 
   tags = {
     enviroment = "dev"
@@ -98,8 +98,8 @@ resource "azurerm_network_security_group" "echt-sg" {
 }
 
 # Inbound ruleset
-resource "azurerm_network_security_rule" "echt-dev-rule" {
-  name                        = "echt-dev-rule"
+resource "azurerm_network_security_rule" "eHH-dev-rule" {
+  name                        = "eHH-dev-rule"
   priority                    = 100
   direction                   = "Inbound"
   access                      = "Allow"
@@ -108,21 +108,21 @@ resource "azurerm_network_security_rule" "echt-dev-rule" {
   destination_port_range      = "*"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.echt.name
-  network_security_group_name = azurerm_network_security_group.echt-sg.name
+  resource_group_name         = azurerm_resource_group.eHH.name
+  network_security_group_name = azurerm_network_security_group.eHH-sg.name
 }
 
 # Rule assigment to subnet
-resource "azurerm_subnet_network_security_group_association" "echt-sga" {
+resource "azurerm_subnet_network_security_group_association" "eHH-sga" {
   subnet_id                 = azurerm_subnet.internal-sv.id
-  network_security_group_id = azurerm_network_security_group.echt-sg.id
+  network_security_group_id = azurerm_network_security_group.eHH-sg.id
 }
 
 # Create public IP
-resource "azurerm_public_ip" "echt-ip" {
-  name                = "echt-ip-1"
-  resource_group_name = azurerm_resource_group.echt.name
-  location            = azurerm_resource_group.echt.location
+resource "azurerm_public_ip" "eHH-ip" {
+  name                = "eHH-ip-1"
+  resource_group_name = azurerm_resource_group.eHH.name
+  location            = azurerm_resource_group.eHH.location
   allocation_method   = "Static"
 
   tags = {
@@ -131,16 +131,16 @@ resource "azurerm_public_ip" "echt-ip" {
 }
 
 # Create Interface on Subnet with public IP 
-resource "azurerm_network_interface" "echt-nic" {
-  name                = "echt-nic"
-  location            = azurerm_resource_group.echt.location
-  resource_group_name = azurerm_resource_group.echt.name
+resource "azurerm_network_interface" "eHH-nic" {
+  name                = "eHH-nic"
+  location            = azurerm_resource_group.eHH.location
+  resource_group_name = azurerm_resource_group.eHH.name
 
   ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.internal-sv.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.echt-ip.id
+    public_ip_address_id          = azurerm_public_ip.eHH-ip.id
   }
 
   tags = {
