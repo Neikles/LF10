@@ -131,7 +131,7 @@ resource "azurerm_public_ip" "eHH-ip" {
 }
 
 # Create Interface on Subnet with public IP 
-resource "azurerm_network_interface" "eHH-nic" {
+resource "azurerm_network_interface" "eHH" {
   name                = "eHH-nic"
   location            = azurerm_resource_group.eHH.location
   resource_group_name = azurerm_resource_group.eHH.name
@@ -139,11 +139,35 @@ resource "azurerm_network_interface" "eHH-nic" {
   ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.internal-sv.id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = "Static"
     public_ip_address_id          = azurerm_public_ip.eHH-ip.id
   }
 
   tags = {
     enviroment = "dev"
+  }
+}
+
+resource "azurerm_windows_virtual_machine" "main" {
+  name                            = "${var.prefix}-vm"
+  resource_group_name             = azurerm_resource_group.eHH.name
+  location                        = azurerm_resource_group.eHH.location
+  size                            = "Standard_B2s"
+  admin_username                  = "adminuser"
+  admin_password                  = "P@ssw0rd1234!"
+   network_interface_ids = [
+    azurerm_network_interface.eHH.id,
+  ]
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2019-Datacenter"
+    version   = "latest"
+  }
+
+  os_disk {
+    storage_account_type = "Standard_LRS"
+    caching              = "ReadWrite"
   }
 }
