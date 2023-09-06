@@ -16,11 +16,24 @@ provider "azurerm" {
 # Create a resource group
 resource "azurerm_resource_group" "eHH" {
   name     = "${var.prefix}-rg"
-  location = var.location
+  location = var.resource_group_location
 
   tags = {
     enviroment = "dev"
   }
+}
+
+# Private DNS
+resource "azurerm_private_dns_zone" "eHH" {
+  name                = "eHH.de"
+  resource_group_name = azurerm_resource_group.eHH.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "eHH" {
+  name                  = "private_dns_vn"
+  resource_group_name   = azurerm_resource_group.eHH.name
+  private_dns_zone_name = azurerm_private_dns_zone.eHH.name
+  virtual_network_id    = azurerm_virtual_network.eHH.id
 }
 
 # Create a virtuell network
@@ -123,7 +136,7 @@ resource "azurerm_public_ip" "eHH-ip" {
   name                = "eHH-ip-1"
   resource_group_name = azurerm_resource_group.eHH.name
   location            = azurerm_resource_group.eHH.location
-  allocation_method   = "Static"
+  allocation_method   = "Dynamic"
 
   tags = {
     enviroment = "dev"
@@ -131,13 +144,13 @@ resource "azurerm_public_ip" "eHH-ip" {
 }
 
 # Create Interface on Subnet with public IP 
-resource "azurerm_network_interface" "eHH" {
+resource "azurerm_network_interface" "nics" {
   name                = "eHH-nic"
   location            = azurerm_resource_group.eHH.location
   resource_group_name = azurerm_resource_group.eHH.name
 
   ip_configuration {
-    name                          = "internal"
+    name                          = "ip-conf"
     subnet_id                     = azurerm_subnet.internal-sv.id
     private_ip_address_allocation = "Static"
     public_ip_address_id          = azurerm_public_ip.eHH-ip.id
@@ -148,16 +161,15 @@ resource "azurerm_network_interface" "eHH" {
   }
 }
 
+#Windows ServerVM
 resource "azurerm_windows_virtual_machine" "main" {
-  name                            = "${var.prefix}-vm"
-  resource_group_name             = azurerm_resource_group.eHH.name
-  location                        = azurerm_resource_group.eHH.location
-  size                            = "Standard_B2s"
-  admin_username                  = "adminuser"
-  admin_password                  = "P@ssw0rd1234!"
-   network_interface_ids = [
-    azurerm_network_interface.eHH.id,
-  ]
+  name                  = "${var.prefix}-vm"
+  resource_group_name   = azurerm_resource_group.eHH.name
+  location              = azurerm_resource_group.eHH.location
+  size                  = "Standard_B2s"
+  admin_username        = "adminuser"
+  admin_password        = "P@ssw0rd1234!"
+  network_interface_ids = [azurerm_network_interface.nics.id]
 
   source_image_reference {
     publisher = "MicrosoftWindowsServer"
@@ -171,3 +183,5 @@ resource "azurerm_windows_virtual_machine" "main" {
     caching              = "ReadWrite"
   }
 }
+
+
