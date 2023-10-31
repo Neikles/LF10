@@ -1,4 +1,4 @@
-# Lernfeld 10 Projekt / Automatisierung in Azure mit Terraform
+# Lernfeld 10 / Automatisierung in Azure mit Terraform
 
 Unser Schulprojekt drehte sich um die Automatisierung von virtuellen Maschinen in der Azure Cloud unter Verwendung von Terraform. Terraform ist ein Open-Source-Tool, das für die Infrastrukturautomatisierung und -verwaltung entwickelt wurde. Mit Terraform können wir die Erstellung, Konfiguration und Bereitstellung von Cloud-Ressourcen wie virtuellen Maschinen, Netzwerken und Datenbanken in Azure vereinfachen.
 
